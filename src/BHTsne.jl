@@ -24,7 +24,7 @@ function read_unpack(fmt, f)
 end
 
 
-function bh_tsne(samples, no_dims=2, initial_dims=50, perplexity=50,
+function bh_tsne(samples;no_dims=2, initial_dims=50, perplexity=50,
                  theta=0.5, randseed=-1, verbose=false)
     
     samples = broadcast(-, samples, mean(samples,1))
@@ -43,7 +43,6 @@ function bh_tsne(samples, no_dims=2, initial_dims=50, perplexity=50,
     
     sample_count, sample_dim = size(samples)
 
-
     mktempdir() do temp_dir
         
         open(joinpath(temp_dir, "data.dat"),"w") do data_file
@@ -51,56 +50,44 @@ function bh_tsne(samples, no_dims=2, initial_dims=50, perplexity=50,
             nrow,ncol = size(samples)
             fmt = repeat("d",ncol)
             for i = 1:nrow
-                @show samples[i,:]
-                write(data_file, struct.pack(fmt,*samples[i,:]))
+                data_packed = mapreduce(x->struct.pack("d",x), *, samples[i,:])
+                write(data_file, data_packed)
             end
             if randseed != -1
                 write(data_file, struct.pack("i",randseed))
             end
         end
         
-        open(DevNull,"w") do dev_null
             
-            cd(temp_dir) do
-                
-                if verbose
-                    
-                    try
-                        run(pipeline(`$BH_TSNE_path`,stdout=STDERR))
-                    catch excp
-                        warn(excp)
-                        error("ERROR: Call to bh_tsne exited with a non-zero return code exit status,
-                              please refer to the bh_tsne output for further details")
-                    end
-                    
-                else
-                    try
-                        run(pipeline(`$BH_TSNE_path`,stdout=dev_null))
-                    catch excp
-                        warn(excp)
-                        error("ERROR: Call to bh_tsne exited with a non-zero return code exit status,
-                              please enable verbose mode and
-                              refer to the bh_tsne output for further details")
-                    end
-                  
+        cd(temp_dir) do
+            if verbose
+                try
+                    run(pipeline(`$BH_TSNE_path`,stdout=STDERR))
+                catch excp
+                    warn(excp)
+                    error("ERROR: Call to bh_tsne exited with a non-zero return code exit status,
+                          please refer to the bh_tsne output for further details")
                 end
-                  
+            else
+                try
+                    run(pipeline(`$BH_TSNE_path`,stdout=DevNull))
+                catch excp
+                    warn(excp)
+                    error("ERROR: Call to bh_tsne exited with a non-zero return code exit status,
+                          please enable verbose mode and refer to the bh_tsne output for further details")
+                end
             end
-            
         end
-        
+            
+               
         open(joinpath(temp_dir, "result.dat"),"r") do output_file
             result_samples, result_dims = read_unpack("ii", output_file)
             results = [read_unpack(repeat("d", result_dims), output_file) for _ in 1:result_samples]
             results = [(read_unpack("i",output_file),e) for e in results]
             sort!(results)
-            #for (_,result) in results
-            #    yield result
-            #end
-            
             ret = Array{Float64,2}(result_dims, result_samples)
             for i in 1:result_samples
-                ret[:,i] = collect(results[i])[2:end]
+                ret[:,i] = collect(results[i][2])
             end
             return ret'
         end
