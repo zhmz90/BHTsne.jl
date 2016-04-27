@@ -19,8 +19,9 @@ There are also other wrappers available in [Python](https://github.com/lvdmaaten
 	results = bh_tsne(samples,perplexity=30,verbose=true)
 	
 	p = plot(x=results[:,1],y=results[:,2],color=labels)
-	draw(PDF("tsne_of_iris.pdf",4inch,3inch), p)
+	draw(PDF("tsne_of_iris.pdf",8inch,6inch), p)
 ```
+![tsne_of_iris.png](tsne_of_iris.png)
 
 ### APIs
 ```Julia
