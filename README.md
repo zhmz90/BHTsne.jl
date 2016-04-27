@@ -4,7 +4,7 @@ This package is a Julia interface to [Van der Maaten's Barnes-Hut C++ implementa
 There are also other wrappers available in [Python](https://github.com/lvdmaaten/bhtsne), [Matlab](https://github.com/lvdmaaten/bhtsne), [R](https://github.com/jkrijthe/Rtsne) and [Torch](https://github.com/clementfarabet/manifold).
 
 ### Installation
-	Pkg.clone(https://github.com/zhmz90/BHTsne.jl.git)
+	Pkg.clone("https://github.com/zhmz90/BHTsne.jl.git")
 	
 ### Usage
 ```Julia

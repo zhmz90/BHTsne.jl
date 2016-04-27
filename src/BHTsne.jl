@@ -12,7 +12,7 @@ export bh_tsne
 function __init__()
     info(BH_TSNE_path)
     if !isfile(BH_TSNE_path) 
-        cd("cpp") do
+        cd(dirname(BH_TSNE_path)) do
             run(`g++ sptree.cpp tsne.cpp -o bh_tsne -O2`)
         end
     end
