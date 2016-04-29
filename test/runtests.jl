@@ -1,8 +1,4 @@
-src = "../src"
-if !in(src,LOAD_PATH)
-    push!(LOAD_PATH, src)
-end
-using BHtsne
+using BHTsne
 using Base.Test
 
 samples = [1.0 0.0; 0.0 1.0]
