@@ -1,4 +1,5 @@
 # BHTsne
+[![Build Status](https://travis-ci.org/zhmz90/BHTsne.jl.svg?branch=master)](https://travis-ci.org/zhmz90/BHTsne.jl)
 
 This package is a Julia interface to [Van der Maaten's Barnes-Hut C++ implementation of t-Distributed Stochastic Neighbor Embedding](https://github.com/lvdmaaten/bhtsne).
 There are also other wrappers available in [Python](https://github.com/lvdmaaten/bhtsne), [Matlab](https://github.com/lvdmaaten/bhtsne), [R](https://github.com/jkrijthe/Rtsne) and [Torch](https://github.com/clementfarabet/manifold).
