@@ -10,7 +10,9 @@ const BH_TSNE_path = joinpath(dirname(@__FILE__),"cpp/bh_tsne")
 export bh_tsne
 
 function __init__()
-    info(BH_TSNE_path)
+    if OS_NAME == :Windows
+        error("Sorry, BHTsne.jl doesn't support Windows now")
+    end
     if !isfile(BH_TSNE_path) 
         cd(dirname(BH_TSNE_path)) do
             run(`g++ sptree.cpp tsne.cpp -o bh_tsne -O2`)
