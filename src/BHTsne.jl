@@ -1,11 +1,11 @@
 module BHTsne
 
 #using ArgParse
+#using StrPack
 using PyCall
 @pyimport struct
 
-
-const BH_TSNE_path = joinpath(dirname(@__FILE__),"cpp/bh_tsne")
+const BH_TSNE_path = joinpath(dirname(@__FILE__), "cpp/bh_tsne")
 
 export bh_tsne
 
@@ -22,7 +22,7 @@ end
 
 
 function read_unpack(fmt, f)
-    struct.unpack(fmt,read(f,struct.calcsize(fmt)))
+    struct.unpack(fmt, read(f, struct.calcsize(fmt)))
 end
 
 
@@ -59,12 +59,11 @@ function bh_tsne(samples;no_dims=2, initial_dims=50, perplexity=50,
                 write(data_file, struct.pack("i",randseed))
             end
         end
-        
             
         cd(temp_dir) do
             if verbose
                 try
-                    run(pipeline(`$BH_TSNE_path`,stdout=STDERR))
+                    run(pipeline(`$BH_TSNE_path`, stdout=STDERR))
                 catch excp
                     warn(excp)
                     error("ERROR: Call to bh_tsne exited with a non-zero return code exit status,
@@ -72,7 +71,7 @@ function bh_tsne(samples;no_dims=2, initial_dims=50, perplexity=50,
                 end
             else
                 try
-                    run(pipeline(`$BH_TSNE_path`,stdout=DevNull))
+                    run(pipeline(`$BH_TSNE_path`, stdout=DevNull))
                 catch excp
                     warn(excp)
                     error("ERROR: Call to bh_tsne exited with a non-zero return code exit status,
@@ -80,12 +79,11 @@ function bh_tsne(samples;no_dims=2, initial_dims=50, perplexity=50,
                 end
             end
         end
-            
                
         open(joinpath(temp_dir, "result.dat"),"r") do output_file
             result_samples, result_dims = read_unpack("ii", output_file)
             results = [read_unpack(repeat("d", result_dims), output_file) for _ in 1:result_samples]
-            results = [(read_unpack("i",output_file),e) for e in results]
+            results = [(read_unpack("i", output_file),e) for e in results]
             sort!(results)
             ret = Array{Float64,2}(result_dims, result_samples)
             for i in 1:result_samples
