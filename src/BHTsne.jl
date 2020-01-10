@@ -9,9 +9,9 @@ const BH_TSNE_path = joinpath(dirname(@__FILE__),"cpp","bh_tsne")
 
 export bh_tsne
 
-#=
+
 function __init__()
-    if OS_NAME == :Windows
+    if Sys.iswindows()
         error("Sorry, BHTsne.jl doesn't support Windows now")
     end
     if !isfile(BH_TSNE_path) 
@@ -20,7 +20,6 @@ function __init__()
         end
     end
 end
-=#
 
 
 function read_unpack(fmt,f)
