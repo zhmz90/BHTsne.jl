@@ -3,12 +3,11 @@ module BHTsne
 using Statistics
 using LinearAlgebra
 using PyCall
-pystruct = pyimport("struct")
+
 
 const BH_TSNE_path = joinpath(dirname(@__FILE__),"cpp","bh_tsne")
 
 export bh_tsne
-
 
 function __init__()
     if Sys.iswindows()
@@ -21,15 +20,16 @@ function __init__()
     end
 end
 
-
+#=
 function read_unpack(fmt,f)
     pystruct.unpack(fmt,read(f, pystruct.calcsize(fmt)))
 end
+=#
 
-
-function bh_tsne(samples;no_dims=2, initial_dims=50, perplexity=50,
+function bh_tsne(samples;no_dims=2, initial_dims=50, perplexity=50.0,
                  theta=0.5, randseed=-1, verbose=true)
    
+    pystruct = pyimport("struct")
     samples = broadcast(-, samples, mean(samples,dims=1))
     cov_x = samples' * samples
     eig_val,eig_vec = eigen(cov_x)
@@ -66,7 +66,7 @@ function bh_tsne(samples;no_dims=2, initial_dims=50, perplexity=50,
                 try
                     run(pipeline(`$BH_TSNE_path`, stdout=stderr))
                 catch excp
-                    warn(excp)
+                    @warn excp
                     error("ERROR: Call to bh_tsne exited with a non-zero return code exit status,
                           please refer to the bh_tsne output for further details")
                 end
@@ -74,16 +74,23 @@ function bh_tsne(samples;no_dims=2, initial_dims=50, perplexity=50,
                 try
                     run(pipeline(`$BH_TSNE_path`, stdout=devnull))
                 catch excp
-                    warn(excp)
+                    @warn excp
                     error("ERROR: Call to bh_tsne exited with a non-zero return code exit status,
                           please enable verbose mode and refer to the bh_tsne output for further details")
                 end
             end
         end    
         open(joinpath(temp_dir, "result.dat"),"r") do output_file
-            result_samples, result_dims = read_unpack("ii", output_file)
-            results = [read_unpack(repeat("d", result_dims), output_file) for _ in 1:result_samples]
-            results = [(read_unpack("i", output_file),e) for e in results]
+		fmt = "ii"
+		f = output_file
+            result_samples, result_dims = pystruct.unpack(fmt,read(f, pystruct.calcsize(fmt)))
+
+    
+		fmt = repeat("d", result_dims)
+
+            results = [pystruct.unpack(fmt,read(f, pystruct.calcsize(fmt))) for _ in 1:result_samples]
+		fmt = "i"
+            results = [(pystruct.unpack(fmt,read(f, pystruct.calcsize(fmt))),e) for e in results]
             sort!(results)
             ret = Array{Float64,2}(undef,result_samples,result_dims)
             for i in 1:result_samples
